@@ -1,5 +1,3 @@
-# shelfapp
-This is the code for a book shelf app
 <!DOCTYPE html>
 <html lang="en">
 <head>
