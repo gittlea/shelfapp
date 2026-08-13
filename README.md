@@ -26,13 +26,6 @@ body{
 h1{ font-family: 'Newsreader', serif; font-weight: 500; font-size: 26px; margin: 0 0 4px; }
 .sub{ font-size: 13px; color: var(--mid); margin: 0 0 20px; line-height: 1.5; max-width: 52ch; }
 
-.exports{ display:flex; gap:8px; flex-shrink:0; padding-top: 4px; }
-.exports button{
-  border: 1px solid var(--line); background: transparent; color: var(--mid);
-  font-size: 11px; font-family: 'Inter', sans-serif; padding: 6px 10px; cursor: pointer;
-}
-.exports button:hover{ border-color: var(--ink); color: var(--ink); }
-
 .tabs{ display:flex; gap: 18px; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
 .tab-btn{
   border: none; background: none; cursor:pointer;
