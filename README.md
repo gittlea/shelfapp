@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Shelf Atlas</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500&display=swap');
+/* Removed external font import to avoid network dependency */
 
 :root{
   --bg: #fafaf8;
@@ -25,6 +25,13 @@ body{
 .top{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom: 4px; }
 h1{ font-family: 'Newsreader', serif; font-weight: 500; font-size: 26px; margin: 0 0 4px; }
 .sub{ font-size: 13px; color: var(--mid); margin: 0 0 20px; line-height: 1.5; max-width: 52ch; }
+
+.exports{ display:flex; gap:8px; flex-shrink:0; padding-top: 4px; }
+.exports button{
+  border: 1px solid var(--line); background: transparent; color: var(--mid);
+  font-size: 11px; font-family: 'Inter', sans-serif; padding: 6px 10px; cursor: pointer;
+}
+.exports button:hover{ border-color: var(--ink); color: var(--ink); }
 
 .tabs{ display:flex; gap: 18px; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
 .tab-btn{
@@ -198,7 +205,6 @@ h1{ font-family: 'Newsreader', serif; font-weight: 500; font-size: 26px; margin:
       <p class="sub">Add books in Collection, browse them as a bookcase in Shelf, and edit details in Encyclopedia.</p>
     </div>
     <div class="exports">
-      <button id="export-json">Export JSON</button>
       <button id="export-csv">Export CSV</button>
     </div>
   </div>
@@ -382,9 +388,9 @@ async function callClaude(system, userMsg, maxTokens){
 
 async function enrichBook(title, existingClusters){
   const sys = `You identify books from a title and return ONLY a JSON object, no prose, no markdown fences. `
-    + `Fields: "author", "year" (integer), "cluster" (a literary movement, scene, generational cohort, or broad tradition), "reason" (one sentence, under 20 words, on why it fits), "confidence" ("high" or "low"). `
+    + `Fields: "author", "year" (integer), "cluster" (a literary movement, scene, generational cohort, or broad tradition), "reason" (one sentence, under 20 words, on why it fits), "confidence" ("high[...]`
     + `Reuse one of these existing clusters ONLY if the book is a genuine fit — same national/literary tradition, era, and mode, not just a loose era overlap: ${JSON.stringify(existingClusters)}. `
-    + `Do not force a book into an existing cluster from the wrong country or tradition just because it's convenient (e.g. do not put a 19th-century Russian novel in a "French Realism" cluster). If none of the existing clusters are a genuine fit, invent an accurate new one instead, and prefer broader/larger groupings over narrow ones when inventing. `
+    + `Do not force a book into an existing cluster from the wrong country or tradition just because it's convenient (e.g. do not put a 19th-century Russian novel in a "French Realism" cluster). If no[...]`
     + `Set "confidence" to "low" if you are guessing at the title, unsure of the exact book, or unsure the cluster is right — the person will double-check anything marked low. `
     + `Respond with exactly: {"author":"...","year":1234,"cluster":"...","reason":"...","confidence":"high"}`;
   const text = await callClaude(sys, title, 300);
@@ -394,12 +400,12 @@ async function enrichBook(title, existingClusters){
 }
 
 async function summarizeCluster(clusterName, titles){
-  const sys = `You are a literary critic. In 2-3 sentences, write a short bio of the literary movement/cluster "${clusterName}": what defines it (style, themes, era) and how its member books/authors relate historically or stylistically. Be specific, not generic. Plain prose, no markdown.`;
+  const sys = `You are a literary critic. In 2-3 sentences, write a short bio of the literary movement/cluster "${clusterName}": what defines it (style, themes, era) and how its member books/authors r[...]`
   return await callClaude(sys, `Books in this cluster: ${titles.join(', ')}`, 220);
 }
 
 async function suggestBridge(clusterA, clusterB){
-  const sys = `You are a literary critic helping bridge two adjacent shelves in a personal library. Suggest 1-2 real, specific books that would form a natural transition between the movement/cluster "${clusterA}" and the movement/cluster "${clusterB}" — books with a genuine historical, stylistic, or influence-based connection to both, not vague vibes. Return ONLY a JSON array, no prose, no markdown fences, like: [{"title":"...","author":"...","reason":"one short sentence, under 22 words"}]`;
+  const sys = `You are a literary critic helping bridge two adjacent shelves in a personal library. Suggest 1-2 real, specific books that would form a natural transition between the movement/cluster "[...]`
   const text = await callClaude(sys, `Cluster A: ${clusterA}\nCluster B: ${clusterB}`, 350);
   
   // --- FIX 3: Resilient JSON parsing regex ---
@@ -819,16 +825,13 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
-// ---------- export ----------
+// ---------- export (CSV only) ----------
 function download(filename, content, mime){
   const blob = new Blob([content], {type: mime});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=filename;
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
-document.getElementById('export-json').addEventListener('click', ()=>{
-  download('shelf-atlas.json', JSON.stringify({ books, clusterOrder, wishlist }, null, 2), 'application/json');
-});
 document.getElementById('export-csv').addEventListener('click', ()=>{
   const header = ['Title','Author','Year','Cluster','Note'];
   const rows = books.map(b=>[b.title,b.author,b.year??'',b.cluster,b.note||''].map(v=>{
@@ -840,6 +843,7 @@ document.getElementById('export-csv').addEventListener('click', ()=>{
 document.getElementById('add-btn').addEventListener('click', addBook);
 document.querySelectorAll('.add input').forEach(i=>i.addEventListener('keydown', e=>{ if(e.key==='Enter') addBook(); }));
 
+autoLoad: load();
 load();
 </script>
 </body>
